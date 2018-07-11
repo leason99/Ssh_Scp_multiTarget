@@ -46,16 +46,16 @@ def scp (ip,port, username, password,mode,remotePath,localPath):
     t.close()
 
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('-ip')
-parser.add_argument('-cmd')
-parser.add_argument('-s',action="store_true")
-parser.add_argument('-scp')
-parser.add_argument('-remotePath')
-parser.add_argument('-localPath')
-parser.add_argument('-username')
-parser.add_argument('-password')
-parser.add_argument('-a',action="store_true")
+parser = argparse.ArgumentParser(description="It's tool for update file or command multidevices")
+parser.add_argument('-s',action="store_true",help="get sudo in ssh")
+parser.add_argument('-a',action="store_true",help='scan device in the same network and procee with it')
+parser.add_argument('-ip',help='Target device ip')
+parser.add_argument('-cmd', help="command you want conduct in device")
+parser.add_argument('-scp',help="upload|download")
+parser.add_argument('-remotePath',help="file path in remote")
+parser.add_argument('-localPath',help="file path in remote")
+parser.add_argument('-username',help="Target device username")
+parser.add_argument('-password',help="Target device password")
 
 
 args = parser.parse_args()
