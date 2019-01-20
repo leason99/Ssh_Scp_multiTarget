@@ -5,6 +5,11 @@ import argparse
 import nmap
 
 
+from paramiko import SSHClient
+
+from scp import SCPClient
+import sys
+
 def scanAllDeivce(ip,port):
     nm = nmap.PortScanner()         # instantiate nmap.PortScanner object
     nm.scan('{}/24'.format(ip),str(port))
@@ -30,20 +35,30 @@ def sshCmd(ip,  port, username, password,cmd,sudo):
 def scp (ip,port, username, password,mode,remotePath,localPath):
     
     print(ip)
-    t = paramiko.Transport((ip,port))
-    t.connect(username = username, password = password)
-    sftp = paramiko.SFTPClient.from_transport(t)
-    #'/etc/modprobe.d/raspi-blacklist.conf'
-      #'/Users/leason/raspi-blacklist.conf'
+
+
+
+    ssh = SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    print(ip, int(port), username, password)
+
+    ssh.connect(ip, int(port), username, password, look_for_keys=False)
+    
+    def progress4(filename, size, sent, peername):
+        sys.stdout.write("(%s:%s) %s\'s progress: %.2f%%   \r" % (peername[0], peername[1], filename, float(sent)/float(size)*100) )
+
+    scp = SCPClient(ssh.get_transport(), progress4=progress4)
+
     try :
         if mode=="upload":
-            sftp.put(localPath,remotePath)
+            scp.put(localPath,remotePath,recursive=True)
         elif mode=="download":
-            sftp.get(localPath,remotePath)
+            scp.get(localPath,remotePath,recursive=True)
     except  Exception as e:
         print(e)
         
-    t.close()
+    scp.close()
+    ssh.close()
 
 
 parser = argparse.ArgumentParser(description="It's tool for update file or command multidevices")
@@ -66,17 +81,21 @@ port =22
 if args.username:
     username=args.username
 if args.password:
-    username=args.password
+    password=args.password
 print(username)
 
 if args.a:
     nm,all_hosts=scanAllDeivce(ip,port)
     for  deviceIp in all_hosts :
         if nm[deviceIp]['tcp'][22]['state']=='open' :
-            if args.cmd:
-                sshCmd(deviceIp,port, username, password,args.cmd,args.s)
-            elif args.scp :
-                scp (deviceIp,port, username, password,args.scp,args.remotePath,args.localPath)
+            try :
+                if args.cmd:
+                    sshCmd(deviceIp,port, username, password,args.cmd,args.s)
+                elif args.scp :
+                    
+                    scp (deviceIp,port, username, password,args.scp,args.remotePath,args.localPath)
+            except  Exception as e:
+                print(e)
 else :
     if args.cmd:
         sshCmd(args.ip,port, username, password,args.cmd,args.s)
