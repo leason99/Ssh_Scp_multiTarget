@@ -34,13 +34,11 @@ def sshCmd(ip,  port, username, password,cmd,sudo):
 
 def scp (ip,port, username, password,mode,remotePath,localPath):
     
-    print(ip)
 
 
 
     ssh = SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    print(ip, int(port), username, password)
 
     ssh.connect(ip, int(port), username, password, look_for_keys=False)
     
@@ -88,6 +86,8 @@ if args.a:
     nm,all_hosts=scanAllDeivce(ip,port)
     for  deviceIp in all_hosts :
         if nm[deviceIp]['tcp'][22]['state']=='open' :
+            print(ip)
+
             try :
                 if args.cmd:
                     sshCmd(deviceIp,port, username, password,args.cmd,args.s)
