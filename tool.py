@@ -22,9 +22,9 @@ def sshCmd(ip,  port, username, password,cmd,sudo):
     
     ssh.connect(ip, port, username, password)
     if args.s:
-        stdin, stdout, stderr=ssh.exec_command('echo {} | sudo  {}'.format(password,cmd))
+        stdin, stdout, stderr=ssh.exec_command('echo {} | sudo  -S {}'.format(password,cmd), get_pty=True)
     else:
-        stdin, stdout, stderr=ssh.exec_command('{}'.format(password,cmd))
+        stdin, stdout, stderr=ssh.exec_command('{}'.format(password,cmd), get_pty=True)
     #print(stdin.readlines())
     for line in stdout.readlines():
         print(line)
@@ -80,22 +80,25 @@ if args.username:
     username=args.username
 if args.password:
     password=args.password
-print(username)
+print("username : ",username,end="  ")
 
 if args.a:
     nm,all_hosts=scanAllDeivce(ip,port)
     for  deviceIp in all_hosts :
         if nm[deviceIp]['tcp'][22]['state']=='open' :
-            print(ip)
+            print(deviceIp,': ',end="")
 
             try :
                 if args.cmd:
                     sshCmd(deviceIp,port, username, password,args.cmd,args.s)
+
                 elif args.scp :
                     
                     scp (deviceIp,port, username, password,args.scp,args.remotePath,args.localPath)
             except  Exception as e:
                 print(e)
+            else :
+                print("finish")
 else :
     if args.cmd:
         sshCmd(args.ip,port, username, password,args.cmd,args.s)
